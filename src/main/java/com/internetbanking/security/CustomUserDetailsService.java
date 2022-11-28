@@ -1,7 +1,7 @@
 package com.internetbanking.security;
 
-import com.sakila.entity.User;
-import com.sakila.repository.UserRepository;
+import com.internetbanking.entity.User;
+import com.internetbanking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,10 +19,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Username is invalid!"));
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
-                .password(user.getPassword())
-                .authorities(new SimpleGrantedAuthority("ROLE_USER"))
-                .build();
+        return null;
+//        return org.springframework.security.core.userdetails.User
+//                .withUsername(user.getUsername())
+//                .password(user.getPassword())
+//                .authorities(new SimpleGrantedAuthority("ROLE_USER"))
+//                .build();
     }
 }

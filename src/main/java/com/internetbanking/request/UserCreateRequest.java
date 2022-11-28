@@ -1,25 +1,25 @@
-package com.internetbanking.entity;
+package com.internetbanking.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.internetbanking.entity.Role;
 import com.internetbanking.util.DateUtil;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Column;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder=true)
-public class User extends JpaEntity {
+public class UserCreateRequest {
 
     @Email(message = "{user.email.format}")
     @Column(unique = true, nullable = false)
@@ -44,17 +44,5 @@ public class User extends JpaEntity {
     @Size(min = 20, max = 100, message = "{user.address.size}")
     private String address;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Role role;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private UserRefreshToken refreshToken;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Account> accounts = new ArrayList<>();
-
-    public void addRefreshToken(UserRefreshToken refreshToken) {
-        this.refreshToken = refreshToken;
-        refreshToken.setUser(this);
-    }
+//    private Role role;
 }
