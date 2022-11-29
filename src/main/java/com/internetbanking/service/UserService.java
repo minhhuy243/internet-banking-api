@@ -47,7 +47,8 @@ public class UserService {
 
         String accessToken = jwtProvider.generateJwtToken(authentication);
         String refreshToken = jwtProvider.generateJwtRefreshToken(authentication);
-        User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new RuntimeException());
+//        User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new RuntimeException());
+        User user = null;
         if(user.getRefreshToken() != null) {
             user.getRefreshToken().setToken(refreshToken);
         } else {
