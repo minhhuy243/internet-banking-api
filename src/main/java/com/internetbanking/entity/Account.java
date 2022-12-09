@@ -1,5 +1,6 @@
 package com.internetbanking.entity;
 
+import com.internetbanking.entity.type.AccountType;
 import lombok.*;
 
 import javax.persistence.*;
@@ -18,20 +19,15 @@ import java.util.List;
 @Builder(toBuilder=true)
 public class Account extends JpaEntity {
 
-    @NotBlank(message = "{user.full-name.not-blank}")
-    @Size(min = 3, max = 50, message = "{user.full-name.size}")
-    private String fullName;
-
     private Long accountNumber;
 
     private LocalDateTime dateOpened;
 
     private BigDecimal balance;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     private AccountType type;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     private User user;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)

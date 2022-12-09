@@ -3,6 +3,7 @@ package com.internetbanking.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.internetbanking.util.DateUtil;
 import lombok.*;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -37,21 +38,21 @@ public class User extends JpaEntity {
 
     @NotBlank(message = "{user.phone-number.not-blank}")
     @Pattern(regexp = "(^((?=(0))[0-9]{10})$)", message = "{user.phone-number.pattern}")
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String phoneNumber;
 
     @NotBlank(message = "{user.address.not-blank}")
     @Size(min = 20, max = 100, message = "{user.address.size}")
     private String address;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     private Role role;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserRefreshToken refreshToken;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Account> accounts = new ArrayList<>();
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Account account;
 
     public void addRefreshToken(UserRefreshToken refreshToken) {
         this.refreshToken = refreshToken;

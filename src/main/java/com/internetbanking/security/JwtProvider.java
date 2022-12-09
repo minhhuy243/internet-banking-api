@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.time.ZoneId;
 import java.util.Date;
 
 @Component
+@PropertySource("classpath:application.yml")
 public class JwtProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtProvider.class);
@@ -26,6 +28,9 @@ public class JwtProvider {
     @Value("${internet-banking.app.jwt-refresh-duration}")
     private Long jwtRefreshDuration;
 
+    public Claims extractAllClaims(String token) {
+        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+    }
 
     public String getUsername(String token) {
         Claims claims = extractAllClaims(token);
@@ -42,27 +47,21 @@ public class JwtProvider {
         return expiration.isBefore(LocalDateTime.now());
     }
 
-    public Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
-    }
-
-    public String generateJwtToken(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+    public String generateJwtToken(String subject) {
         Date issuedAt = new Date();
         Date expiration = new Date(issuedAt.getTime() + jwtDuration);
-        return doGenerateJwtToken(userDetails, issuedAt, expiration);
+        return doGenerateJwtToken(subject, issuedAt, expiration);
     }
 
-    public String generateJwtRefreshToken(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+    public String generateJwtRefreshToken(String subject) {
         Date issuedAt = new Date();
         Date expiration = new Date(issuedAt.getTime() + jwtRefreshDuration);
-        return doGenerateJwtToken(userDetails, issuedAt, expiration);
+        return doGenerateJwtToken(subject, issuedAt, expiration);
     }
 
-    public String doGenerateJwtToken(UserDetails userDetails, Date issuedAt, Date expiration) {
+    public String doGenerateJwtToken(String subject, Date issuedAt, Date expiration) {
         return Jwts.builder()
-                .setSubject(userDetails.getUsername())
+                .setSubject(subject)
                 .setIssuedAt(issuedAt)
                 .setExpiration(expiration)
                 .signWith(SignatureAlgorithm.HS512, jwtSecret)

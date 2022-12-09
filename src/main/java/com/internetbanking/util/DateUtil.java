@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 public class DateUtil {
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
-    public static final String BIRTHDAY_FORMAT = "dd-MM-yyyy";
+    public static final String BIRTHDAY_FORMAT = "yyyy-MM-dd";
 
     private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 

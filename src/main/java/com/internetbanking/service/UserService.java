@@ -1,11 +1,16 @@
 package com.internetbanking.service;
 
+import com.internetbanking.entity.Account;
 import com.internetbanking.entity.User;
 import com.internetbanking.entity.UserRefreshToken;
+import com.internetbanking.entity.type.AccountType;
+import com.internetbanking.repository.AccountRepository;
+import com.internetbanking.repository.RoleRepository;
 import com.internetbanking.repository.UserRefreshTokenRepository;
 import com.internetbanking.repository.UserRepository;
 import com.internetbanking.request.LoginRequest;
-import com.internetbanking.request.UserCreateRequest;
+import com.internetbanking.request.RefreshTokenRequest;
+import com.internetbanking.request.UserRequest;
 import com.internetbanking.response.LoginResponse;
 import com.internetbanking.response.RefreshTokenResponse;
 import com.internetbanking.security.JwtProvider;
@@ -18,6 +23,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -27,30 +37,59 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
-    private final UserDetailsService userDetailsService;
+    private final SecurityService securityService;
     private final UserRefreshTokenRepository userRefreshTokenRepository;
+    private final RoleRepository roleRepository;
+    private final AccountRepository accountRepository;
 
-    public User create(UserCreateRequest request) {
-//        User user = User.builder()
-//                .email(request.getUsername())
-//                .password(passwordEncoder.encode(request.getPassword()))
-//                .build();
+    @Transactional
+    public User register(UserRequest request) {
+        User user = new User().toBuilder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .fullName(request.getFullName())
+                .birthday(request.getBirthday())
+                .phoneNumber(request.getPhoneNumber())
+                .address(request.getAddress())
+                .build();
+        if (securityService.getRole().equals("ROLE_EMPLOYEE")) {
+            user.setRole(roleRepository.findByCode("ROLE_CUSTOMER"));
+        } else {
+            user.setRole(roleRepository.findByCode("ROLE_EMPLOYEE"));
+        }
+//        user.setRole(roleRepository.findByCode("ROLE_CUSTOMER"));
+        User newUser = userRepository.saveAndFlush(user);
 
-//        return userRepository.save(user);
-        return null;
+        Random rand = new Random();
+        StringBuilder accountNumber = new StringBuilder();
+        for (int i = 0; i < 10; i++) {
+            int n = rand.nextInt(10);
+            accountNumber.append(n);
+        }
+        Account account = new Account().toBuilder()
+                .accountNumber(Long.valueOf(accountNumber.toString()))
+                .dateOpened(LocalDateTime.now())
+                .balance(BigDecimal.ZERO)
+                .type(AccountType.PAYMENT)
+                .user(newUser)
+                .build();
+        accountRepository.save(account);
+        newUser.setPassword(null);
+        return newUser;
     }
 
     public LoginResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String accessToken = jwtProvider.generateJwtToken(authentication);
-        String refreshToken = jwtProvider.generateJwtRefreshToken(authentication);
-//        User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new RuntimeException());
-        User user = null;
+        String accessToken = jwtProvider.generateJwtToken(request.getEmail());
+        String refreshToken = jwtProvider.generateJwtRefreshToken(request.getEmail());
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new RuntimeException());
         if(user.getRefreshToken() != null) {
-            user.getRefreshToken().setToken(refreshToken);
+            UserRefreshToken refreshTokenEntity = user.getRefreshToken();
+            refreshTokenEntity.setToken(refreshToken);
+            refreshTokenEntity.setExpiryDate(jwtProvider.getExpirationDate(refreshToken));
         } else {
             UserRefreshToken refreshTokenEntity = UserRefreshToken.builder()
                     .token(refreshToken)
@@ -71,18 +110,15 @@ public class UserService {
                 .build();
     }
 
-    public RefreshTokenResponse getRefreshToken(String refreshToken) {
-        UserRefreshToken refreshTokenEntity = userRefreshTokenRepository.findByToken(refreshToken);
-        String username = jwtProvider.getUsername(refreshToken);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities());
-        String accessToken = jwtProvider.generateJwtToken(authentication);
-        refreshTokenEntity.setToken(accessToken);
-        userRefreshTokenRepository.save(refreshTokenEntity);
-
-        RefreshTokenResponse refreshTokenResponse = new RefreshTokenResponse();
-        refreshTokenResponse.setAccessToken(jwtProvider.generateJwtToken(authentication));
-        return refreshTokenResponse;
+    public RefreshTokenResponse getNewToken(RefreshTokenRequest request) {
+        UserRefreshToken refreshTokenEntity = userRefreshTokenRepository.findByToken(request.getRefreshToken()).orElseThrow(() -> new RuntimeException());
+        User user = refreshTokenEntity.getUser();
+        if (jwtProvider.isTokenExpired(refreshTokenEntity.getToken())) {
+            refreshTokenEntity.setToken(jwtProvider.generateJwtRefreshToken(user.getEmail()));
+            userRefreshTokenRepository.save(refreshTokenEntity);
+        }
+        return new RefreshTokenResponse().toBuilder()
+                .accessToken(jwtProvider.generateJwtToken(user.getEmail()))
+                .build();
     }
 }

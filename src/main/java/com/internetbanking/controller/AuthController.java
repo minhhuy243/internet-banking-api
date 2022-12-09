@@ -1,6 +1,7 @@
 package com.internetbanking.controller;
 
 import com.internetbanking.request.LoginRequest;
+import com.internetbanking.request.RefreshTokenRequest;
 import com.internetbanking.response.LoginResponse;
 import com.internetbanking.response.RefreshTokenResponse;
 import com.internetbanking.service.UserService;
@@ -17,6 +18,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
     private final UserService userService;
 
     @PostMapping("/login")
@@ -26,8 +28,8 @@ public class AuthController {
     }
 
     @PostMapping("/token/refresh")
-    public ResponseEntity<?> getRefresToken(@RequestBody String refreshToken) {
-        RefreshTokenResponse response = userService.getRefreshToken(refreshToken);
+    public ResponseEntity<?> getNewToken(@RequestBody @Valid RefreshTokenRequest request) {
+        RefreshTokenResponse response = userService.getNewToken(request);
         return ResponseEntity.ok(response);
     }
 }

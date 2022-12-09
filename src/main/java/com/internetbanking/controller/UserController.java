@@ -1,7 +1,7 @@
 package com.internetbanking.controller;
 
 import com.internetbanking.entity.User;
-import com.internetbanking.request.UserCreateRequest;
+import com.internetbanking.request.UserRequest;
 import com.internetbanking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,8 +21,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody @Valid UserCreateRequest request) {
-        User user = userService.create(request);
+    public ResponseEntity<?> create(@RequestBody @Valid UserRequest request) {
+        User user = userService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 }

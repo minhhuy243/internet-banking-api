@@ -55,13 +55,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint)
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-//        http.authorizeRequests()
-//                .antMatchers("/users/**", "/auth/**")
-//                .permitAll()
-//                .anyRequest()
-//                .authenticated();
         http.authorizeRequests()
-                        .anyRequest().permitAll();
+                .antMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .antMatchers("/auth/**").permitAll()
+                .anyRequest().authenticated();
+//        http.authorizeRequests()
+//                        .anyRequest().permitAll();
         http.addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
