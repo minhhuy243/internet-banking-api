@@ -1,8 +1,7 @@
 package com.internetbanking.controller;
 
 import com.internetbanking.entity.RecipientAccount;
-import com.internetbanking.request.RecipientAccountCreateRequest;
-import com.internetbanking.request.RecipientAccountUpdateRequest;
+import com.internetbanking.request.RecipientAccountRequest;
 import com.internetbanking.service.RecipientAccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,7 +23,7 @@ public class RecipientAccountController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> create(@RequestBody @Valid RecipientAccountCreateRequest request) {
+    public ResponseEntity<?> create(@RequestBody @Valid RecipientAccountRequest request) {
         try {
             RecipientAccount recipientAccount = recipientAccountService.create(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(recipientAccount);
@@ -34,7 +33,7 @@ public class RecipientAccountController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable("id") Long id, @RequestBody @Valid RecipientAccountUpdateRequest request) {
+    public ResponseEntity<?> update(@PathVariable("id") Long id, @RequestBody @Valid RecipientAccountRequest request) {
         try {
             RecipientAccount recipientAccount = recipientAccountService.update(id, request);
             return ResponseEntity.ok(recipientAccount);

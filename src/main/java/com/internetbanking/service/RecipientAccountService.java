@@ -4,8 +4,7 @@ import com.internetbanking.entity.Account;
 import com.internetbanking.entity.RecipientAccount;
 import com.internetbanking.repository.AccountRepository;
 import com.internetbanking.repository.RecipientAccountRepository;
-import com.internetbanking.request.RecipientAccountCreateRequest;
-import com.internetbanking.request.RecipientAccountUpdateRequest;
+import com.internetbanking.request.RecipientAccountRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,18 +22,18 @@ public class RecipientAccountService {
         return recipientAccountRepository.findByAccountId(securityService.getAccountId());
     }
 
-    public RecipientAccount create(RecipientAccountCreateRequest request) {
+    public RecipientAccount create(RecipientAccountRequest request) {
         Account recipientAccount = accountRepository.findById(request.getRecipientAccountId()).orElseThrow(() -> new RuntimeException());
         RecipientAccount entity = new RecipientAccount()
                 .toBuilder()
                 .recipientAccount(recipientAccount)
-                .reminiscentName(!request.getReminiscentName().isEmpty() ? request.getReminiscentName() : recipientAccount.getFullName())
+                .reminiscentName(!request.getReminiscentName().isEmpty() ? request.getReminiscentName() : recipientAccount.getUser().getFullName())
                 .account(accountRepository.findById(securityService.getAccountId()).orElseThrow(() -> new RuntimeException()))
                 .build();
         return recipientAccountRepository.save(entity);
     }
 
-    public RecipientAccount update(Long id, RecipientAccountUpdateRequest request) {
+    public RecipientAccount update(Long id, RecipientAccountRequest request) {
         RecipientAccount recipientAccount = recipientAccountRepository.findByIdAndAccountId(id, securityService.getAccountId())
                 .orElseThrow(() -> new RuntimeException());
         recipientAccount.setReminiscentName(request.getReminiscentName());

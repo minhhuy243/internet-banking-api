@@ -1,5 +1,6 @@
 package com.internetbanking.entity;
 
+import com.internetbanking.entity.type.DebtReminderStatus;
 import lombok.*;
 
 import javax.persistence.Entity;
