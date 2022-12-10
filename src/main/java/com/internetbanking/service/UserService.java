@@ -44,6 +44,12 @@ public class UserService {
 
     @Transactional
     public User register(UserRequest request) {
+        if (securityService.getRole().equals("ROLE_EMPLOYEE") && !request.getRoleCode().equals("ROLE_CUSTOMER")) {
+            throw new RuntimeException("Role không hợp lệ!");
+        } else if (securityService.getRole().equals("ROLE_ADMIN")
+                && (!request.getRoleCode().equals("ROLE_CUSTOMER") &&!request.getRoleCode().equals("ROLE_EMPLOYEE"))) {
+            throw new RuntimeException("Role không hợp lệ!");
+        }
         User user = new User().toBuilder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -51,23 +57,24 @@ public class UserService {
                 .birthday(request.getBirthday())
                 .phoneNumber(request.getPhoneNumber())
                 .address(request.getAddress())
+                .role(roleRepository.findByCode(request.getRoleCode()).orElseThrow(() -> new RuntimeException("Role không tồn tại!")))
                 .build();
-        if (securityService.getRole().equals("ROLE_EMPLOYEE")) {
-            user.setRole(roleRepository.findByCode("ROLE_CUSTOMER"));
-        } else {
-            user.setRole(roleRepository.findByCode("ROLE_EMPLOYEE"));
-        }
-//        user.setRole(roleRepository.findByCode("ROLE_CUSTOMER"));
         User newUser = userRepository.saveAndFlush(user);
 
         Random rand = new Random();
-        StringBuilder accountNumber = new StringBuilder();
-        for (int i = 0; i < 10; i++) {
-            int n = rand.nextInt(10);
-            accountNumber.append(n);
-        }
+        StringBuilder accountNumberSb;
+        Long accountNumber;
+        do {
+            accountNumberSb = new StringBuilder();
+            for (int i = 0; i < 10; i++) {
+                int n = rand.nextInt(10);
+                accountNumberSb.append(n);
+            }
+            accountNumber = Long.valueOf(accountNumberSb.toString());
+        } while (accountRepository.findByAccountNumber(accountNumber).isPresent());
+
         Account account = new Account().toBuilder()
-                .accountNumber(Long.valueOf(accountNumber.toString()))
+                .accountNumber(accountNumber)
                 .dateOpened(LocalDateTime.now())
                 .balance(BigDecimal.ZERO)
                 .type(AccountType.PAYMENT)

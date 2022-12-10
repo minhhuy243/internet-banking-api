@@ -17,6 +17,7 @@ import java.util.List;
 @Builder(toBuilder=true)
 public class Account extends JpaEntity {
 
+    @Column(unique = true)
     private Long accountNumber;
 
     private LocalDateTime dateOpened;

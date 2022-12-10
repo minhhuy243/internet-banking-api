@@ -44,5 +44,5 @@ public class UserRequest {
     @Size(min = 20, max = 100, message = "{user.address.size}")
     private String address;
 
-//    private Role role;
+    private String roleCode;
 }
