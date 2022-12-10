@@ -6,10 +6,7 @@ import com.internetbanking.service.OtpService;
 import com.internetbanking.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -19,17 +16,16 @@ import javax.validation.Valid;
 public class TransactionController {
 
     private final TransactionService transactionService;
-    private final OtpService otpService;
 
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<?> create(@Valid @RequestBody TransactionRequest request) {
-        Transaction transaction = transactionService.create(request);
-        return ResponseEntity.ok(transaction);
+        Object result = transactionService.create(request);
+        return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/validate")
-    public ResponseEntity<?> validate(Integer otpValue) {
-        Boolean result = otpService.validateOTP("minhhuy243@gmail.com", otpValue);
+    @PostMapping("/validate/{otpValue}")
+    public ResponseEntity<?> validate(@PathVariable("otpValue") Integer otpValue) {
+        Object result = transactionService.validate(otpValue);
         return ResponseEntity.ok(result);
     }
 }

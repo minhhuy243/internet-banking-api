@@ -29,7 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return UserDetailsDto.builder()
                 .user(user)
                 .email(user.getEmail())
-                .accountId(user.getAccount().getAccountNumber())
+                .accountId(user.getAccount().getId())
                 .role(user.getRole().getCode())
                 .build();
 //        return org.springframework.security.core.userdetails.User

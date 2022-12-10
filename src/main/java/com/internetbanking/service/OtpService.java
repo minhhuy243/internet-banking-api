@@ -15,40 +15,36 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class OtpService {
 
-    private final LoadingCache<String, Integer> otpCache;
+    private final LoadingCache<Integer, Object> otpCache;
 
     public OtpService() {
-        final Integer EXPIRE_MIN = 30;
+        final Integer EXPIRE_MIN = 5;
         otpCache = CacheBuilder.newBuilder()
-                .expireAfterWrite(EXPIRE_MIN, TimeUnit.SECONDS)
-                .build(new CacheLoader<String, Integer>() {
+                .expireAfterWrite(EXPIRE_MIN, TimeUnit.MINUTES)
+                .build(new CacheLoader<Integer, Object>() {
                     @Override
-                    public Integer load(String s) throws Exception {
-                        return 0;
+                    public Long load(Integer key) throws Exception {
+                        return null;
                     }
                 });
     }
 
-    public Integer generateOtp(String key)
+    public Integer generateOtp(Long value)
     {
-        // generate otp
         Random random = new Random();
         int otpValue = 100000 + random.nextInt(900000);
-        otpCache.put(key, otpValue);
+        otpCache.put(otpValue, value);
         log.info("Generated OTP: {}", otpValue);
-
         return otpValue;
     }
 
-    public Boolean validateOTP(String key, Integer otpNumber)
+    public Object validateOTP(Integer otpValue)
     {
-        // get OTP from cache
-        Integer cacheOTP = otpCache.getIfPresent(key);
-        if (cacheOTP != null && cacheOTP.equals(otpNumber))
-        {
-            otpCache.invalidate(key);
-            return true;
+        Object value = otpCache.getIfPresent(otpValue);
+        if (value != null) {
+            otpCache.invalidate(otpValue);
+            return Long.valueOf(value.toString());
         }
-        return false;
+        return null;
     }
 }

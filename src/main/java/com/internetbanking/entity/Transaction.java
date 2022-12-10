@@ -1,5 +1,6 @@
 package com.internetbanking.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.internetbanking.entity.type.TransactionStatus;
 import com.internetbanking.entity.type.TransactionType;
 import lombok.*;
