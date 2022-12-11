@@ -23,32 +23,20 @@ public class RecipientAccountController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> create(@RequestBody @Valid RecipientAccountRequest request) {
-        try {
-            RecipientAccount recipientAccount = recipientAccountService.create(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(recipientAccount);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<?> create(@RequestBody RecipientAccountRequest request) {
+        Object result = recipientAccountService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@PathVariable("id") Long id, @RequestBody @Valid RecipientAccountRequest request) {
-        try {
-            RecipientAccount recipientAccount = recipientAccountService.update(id, request);
-            return ResponseEntity.ok(recipientAccount);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Object result = recipientAccountService.update(id, request);
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
-        try {
-            recipientAccountService.delete(id);
-            return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        recipientAccountService.delete(id);
+        return ResponseEntity.ok().build();
     }
 }

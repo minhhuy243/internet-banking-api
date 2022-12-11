@@ -11,6 +11,6 @@ import java.util.Optional;
 public interface RecipientAccountRepository extends JpaRepository<RecipientAccount, Long> {
 
     Optional<RecipientAccount> findByIdAndAccountId(Long id, Long accountId);
-
+    Optional<RecipientAccount> findByRecipientAccount_AccountNumberAndAccount_Id(Long accountNumber, Long id);
     List<RecipientAccount> findByAccountId(Long accountId);
 }

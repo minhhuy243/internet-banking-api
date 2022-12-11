@@ -40,7 +40,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
-            log.info("Logging Response: {} ", response.getStatus());
+//            log.info("Logging Response: {} ", response.getStatus());
         } catch (Exception e) {
             log.error("Can NOT set user authentication -> Message: {}", e);
         }
