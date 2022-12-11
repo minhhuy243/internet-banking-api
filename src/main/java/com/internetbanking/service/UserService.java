@@ -23,6 +23,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -127,5 +128,12 @@ public class UserService {
         return new RefreshTokenResponse().toBuilder()
                 .accessToken(jwtProvider.generateJwtToken(user.getEmail()))
                 .build();
+    }
+
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void changePassword(UserRequest request) {
+        User user = userRepository.findById(securityService.getUserId()).get();
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 }

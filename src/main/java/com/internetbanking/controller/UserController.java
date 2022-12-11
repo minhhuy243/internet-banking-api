@@ -25,4 +25,10 @@ public class UserController {
         User user = userService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
+
+    @PostMapping("change-password")
+    public ResponseEntity<?> changePassword(@RequestBody UserRequest request) {
+        userService.changePassword(request);
+        return ResponseEntity.ok().build();
+    }
 }

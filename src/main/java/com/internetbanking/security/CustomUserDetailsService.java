@@ -28,6 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Email is invalid!"));
         return UserDetailsDto.builder()
                 .user(user)
+                .userId(user.getId())
                 .email(user.getEmail())
                 .accountId(user.getAccount().getId())
                 .role(user.getRole().getCode())

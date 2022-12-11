@@ -26,23 +26,23 @@ public class User extends JpaEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @NotBlank(message = "{user.password.not-blank}")
+    @NotBlank(message = "Mật khẩu không được bỏ trống")
     private String password;
 
-    @NotBlank(message = "{user.full-name.not-blank}")
-    @Size(min = 3, max = 50, message = "{user.full-name.size}")
+    @NotBlank(message = "Tên không được bỏ trống")
+    @Size(min = 3, max = 50)
     private String fullName;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateUtil.BIRTHDAY_FORMAT)
     private LocalDate birthday;
 
-    @NotBlank(message = "{user.phone-number.not-blank}")
-    @Pattern(regexp = "(^((?=(0))[0-9]{10})$)", message = "{user.phone-number.pattern}")
+    @NotBlank(message = "Số điện thoại không được bỏ trống")
+    @Pattern(regexp = "(^((?=(0))[0-9]{10})$)")
     @Column(unique = true, nullable = false)
     private String phoneNumber;
 
-    @NotBlank(message = "{user.address.not-blank}")
-    @Size(min = 20, max = 100, message = "{user.address.size}")
+    @NotBlank(message = "Địa chỉ không được bỏ trống")
+    @Size(min = 10, max = 100, message = "{user.address.size}")
     private String address;
 
     @ManyToOne

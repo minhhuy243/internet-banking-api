@@ -46,7 +46,7 @@ public class TransactionService {
         Transaction newTransaction = transactionRepository.saveAndFlush(transaction);
 
         Integer otpValue = otpService.generateOtp(newTransaction.getId());
-        if (!emailService.sendMessage(securityService.getUsername(), otpValue)) {
+        if (!emailService.sendMessage(securityService.getEmail(), otpValue)) {
             newTransaction.setStatus(TransactionStatus.ERROR);
             transactionRepository.save(newTransaction);
         }

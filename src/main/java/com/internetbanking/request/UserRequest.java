@@ -1,6 +1,7 @@
 package com.internetbanking.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.internetbanking.util.DateUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,31 +19,33 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserRequest {
 
     @Email(message = "{user.email.format}")
-    @Column(unique = true, nullable = false)
     private String email;
 
-    @NotBlank(message = "{user.password.not-blank}")
-    @Size(min = 6, max = 50)
+    @NotBlank(message = "Mật khẩu không được bỏ trống")
     private String password;
 
-    @NotBlank(message = "{user.full-name.not-blank}")
-    @Size(min = 3, max = 50, message = "{user.full-name.size}")
+    @NotBlank(message = "Tên không được bỏ trống")
+    @Size(min = 3, max = 50)
     private String fullName;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateUtil.BIRTHDAY_FORMAT)
     private LocalDate birthday;
 
-    @NotBlank(message = "{user.phone-number.not-blank}")
-    @Pattern(regexp = "(^((?=(0))[0-9]{10})$)", message = "{user.phone-number.pattern}")
-    @Column(unique = true)
+    @NotBlank(message = "Số điện thoại không được bỏ trống")
+    @Pattern(regexp = "(^((?=(0))[0-9]{10})$)")
     private String phoneNumber;
 
-    @NotBlank(message = "{user.address.not-blank}")
-    @Size(min = 20, max = 100, message = "{user.address.size}")
+    @NotBlank(message = "Địa chỉ không được bỏ trống")
+    @Size(min = 10, max = 100)
     private String address;
 
     private String roleCode;
+
+    @NotBlank(message = "Mật khẩu mới không được bỏ trống")
+    @Size(min = 6, max = 50)
+    private String newPassword;
 }

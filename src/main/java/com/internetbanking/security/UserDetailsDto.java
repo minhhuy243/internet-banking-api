@@ -19,6 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class UserDetailsDto implements UserDetails {
 
+    private Long userId;
     private String email;
     private Long accountId;
     private String role;

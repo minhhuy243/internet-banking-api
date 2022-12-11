@@ -8,14 +8,25 @@ import org.springframework.stereotype.Service;
 @Service
 public class SecurityService {
 
-    public String getUsername() {
+    public Long getUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetailsDto principal;
         if (authentication == null || !authentication.isAuthenticated()) {
             return null;
         } else {
             principal = (UserDetailsDto) authentication.getPrincipal();
-            return principal.getUsername();
+            return principal.getUserId();
+        }
+    }
+
+    public String getEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetailsDto principal;
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        } else {
+            principal = (UserDetailsDto) authentication.getPrincipal();
+            return principal.getEmail();
         }
     }
 
