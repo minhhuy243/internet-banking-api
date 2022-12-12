@@ -32,7 +32,10 @@ public class OtpService {
     public Integer generateOtp(Long value)
     {
         Random random = new Random();
-        int otpValue = 100000 + random.nextInt(900000);
+        Integer otpValue;
+        do {
+            otpValue = 100000 + random.nextInt(900000);
+        } while(otpCache.getIfPresent(otpValue) != null);
         otpCache.put(otpValue, value);
         log.info("Generated OTP: {}", otpValue);
         return otpValue;
@@ -43,7 +46,7 @@ public class OtpService {
         Object value = otpCache.getIfPresent(otpValue);
         if (value != null) {
             otpCache.invalidate(otpValue);
-            return Long.valueOf(value.toString());
+            return value;
         }
         return null;
     }

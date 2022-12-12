@@ -45,6 +45,10 @@ public class UserRequest {
 
     private String roleCode;
 
+    @NotBlank(message = "Mật khẩu cũ không được bỏ trống")
+    @Size(min = 6, max = 50)
+    private String oldPassword;
+
     @NotBlank(message = "Mật khẩu mới không được bỏ trống")
     @Size(min = 6, max = 50)
     private String newPassword;

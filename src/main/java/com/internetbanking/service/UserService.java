@@ -4,6 +4,7 @@ import com.internetbanking.entity.Account;
 import com.internetbanking.entity.User;
 import com.internetbanking.entity.UserRefreshToken;
 import com.internetbanking.entity.type.AccountType;
+import com.internetbanking.entity.type.TransactionStatus;
 import com.internetbanking.repository.AccountRepository;
 import com.internetbanking.repository.RoleRepository;
 import com.internetbanking.repository.UserRefreshTokenRepository;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Random;
 
 @Service
@@ -42,6 +44,8 @@ public class UserService {
     private final UserRefreshTokenRepository userRefreshTokenRepository;
     private final RoleRepository roleRepository;
     private final AccountRepository accountRepository;
+    private final OtpService otpService;
+    private final EmailService emailService;
 
     @Transactional
     public User register(UserRequest request) {
@@ -133,6 +137,26 @@ public class UserService {
 //    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void changePassword(UserRequest request) {
         User user = userRepository.findById(securityService.getUserId()).get();
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new RuntimeException("Mật khẩu cũ không đúng!");
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    public void sendOTPForgotPassword() {
+        Integer otpValue = otpService.generateOtp(securityService.getUserId());
+        if (!emailService.sendMessage(securityService.getEmail(), otpValue)) {
+            throw new RuntimeException("Đã có lỗi xảy ra!");
+        }
+    }
+
+    public void validateForgotPassword(Integer otpValue, UserRequest request) {
+        Optional<Object> userId = Optional.ofNullable(otpService.validateOTP(otpValue));
+        if (!userId.isPresent()) {
+            throw new RuntimeException("OTP không hợp lệ!");
+        }
+        User user = userRepository.findById(Long.valueOf(userId.get().toString())).get();
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }

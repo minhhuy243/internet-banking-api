@@ -28,8 +28,7 @@ public class EmailService {
         mailMessage.setText(otpValue.toString());
 
         Boolean isSent = false;
-        try
-        {
+        try {
             emailSender.send(mailMessage);
             isSent = true;
         } catch (Exception e) {

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -65,11 +66,11 @@ public class TransactionService {
 
     @Transactional
     public TransactionDto validate(Integer otpValue) {
-        Long transactionId = Long.valueOf(otpService.validateOTP(otpValue).toString());
-        if (transactionId == null) {
+        Optional<Object> transactionId = Optional.ofNullable(otpService.validateOTP(otpValue));
+        if (!transactionId.isPresent()) {
             throw new RuntimeException("OTP không hợp lệ!");
         }
-        Transaction transaction = transactionRepository.findById(transactionId).orElseThrow(() -> new RuntimeException());
+        Transaction transaction = transactionRepository.findById(Long.valueOf(transactionId.get().toString())).orElseThrow(() -> new RuntimeException());
         transaction.setStatus(TransactionStatus.DONE);
         Account recipientAccount = transaction.getRecipientAccount();
         Account account = transaction.getAccount();
