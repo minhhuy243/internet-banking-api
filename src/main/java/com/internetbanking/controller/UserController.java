@@ -1,5 +1,6 @@
 package com.internetbanking.controller;
 
+import com.internetbanking.dto.UserDto;
 import com.internetbanking.entity.User;
 import com.internetbanking.request.UserRequest;
 import com.internetbanking.service.UserService;
@@ -19,7 +20,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<?> create(@RequestBody @Valid UserRequest request) {
-        User user = userService.register(request);
+        UserDto user = userService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 

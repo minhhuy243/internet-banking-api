@@ -1,10 +1,12 @@
 package com.internetbanking.service;
 
+import com.internetbanking.dto.UserDto;
 import com.internetbanking.entity.Account;
 import com.internetbanking.entity.User;
 import com.internetbanking.entity.UserRefreshToken;
 import com.internetbanking.entity.type.AccountType;
 import com.internetbanking.entity.type.TransactionStatus;
+import com.internetbanking.mapper.UserMapper;
 import com.internetbanking.repository.AccountRepository;
 import com.internetbanking.repository.RoleRepository;
 import com.internetbanking.repository.UserRefreshTokenRepository;
@@ -46,9 +48,10 @@ public class UserService {
     private final AccountRepository accountRepository;
     private final OtpService otpService;
     private final EmailService emailService;
+    private final UserMapper userMapper;
 
     @Transactional
-    public User register(UserRequest request) {
+    public UserDto register(UserRequest request) {
         if (securityService.getRole().equals("ROLE_EMPLOYEE") && !request.getRoleCode().equals("ROLE_CUSTOMER")) {
             throw new RuntimeException("Role không hợp lệ!");
         } else if (securityService.getRole().equals("ROLE_ADMIN")
@@ -85,9 +88,10 @@ public class UserService {
                 .type(AccountType.PAYMENT)
                 .user(newUser)
                 .build();
+        newUser.setAccount(account);
         accountRepository.save(account);
-        newUser.setPassword(null);
-        return newUser;
+//        newUser.setPassword(null);
+        return userMapper.entityToDto(newUser);
     }
 
     public LoginResponse login(LoginRequest request) {

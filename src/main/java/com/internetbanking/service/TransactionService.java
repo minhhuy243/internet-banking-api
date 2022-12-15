@@ -5,16 +5,22 @@ import com.internetbanking.entity.Account;
 import com.internetbanking.entity.Transaction;
 import com.internetbanking.entity.type.TransactionStatus;
 import com.internetbanking.entity.type.TransactionType;
+import com.internetbanking.mapper.TransactionMapper;
 import com.internetbanking.repository.AccountRepository;
 import com.internetbanking.repository.TransactionRepository;
 import com.internetbanking.request.TransactionRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +32,7 @@ public class TransactionService {
     private final SecurityService securityService;
     private final OtpService otpService;
     private final EmailService emailService;
+    private final TransactionMapper transactionMapper;
 
     @Transactional
     public TransactionDto create(TransactionRequest request) {
@@ -51,17 +58,7 @@ public class TransactionService {
             newTransaction.setStatus(TransactionStatus.ERROR);
             transactionRepository.save(newTransaction);
         }
-        return TransactionDto.builder()
-                .id(newTransaction.getId())
-                .tradingDate(newTransaction.getTradingDate())
-                .amount(newTransaction.getAmount())
-                .content(newTransaction.getContent())
-                .internal(newTransaction.getInternal())
-                .type(newTransaction.getType())
-                .status(newTransaction.getStatus())
-                .recipientAccountNumber(newTransaction.getRecipientAccount().getAccountNumber())
-                .accountNumber(newTransaction.getAccount().getAccountNumber())
-                .build();
+        return transactionMapper.entityToDto(newTransaction);
     }
 
     @Transactional
@@ -81,17 +78,15 @@ public class TransactionService {
             recipientAccount.setBalance(recipientAccount.getBalance().add(transaction.getAmount()));
             account.setBalance(account.getBalance().subtract(transaction.getAmount()));
         }
-        Transaction newTransaction = transactionRepository.save(transaction);
-        return TransactionDto.builder()
-                .id(newTransaction.getId())
-                .tradingDate(newTransaction.getTradingDate())
-                .amount(newTransaction.getAmount())
-                .content(newTransaction.getContent())
-                .internal(newTransaction.getInternal())
-                .type(newTransaction.getType())
-                .status(newTransaction.getStatus())
-                .recipientAccountNumber(newTransaction.getRecipientAccount().getAccountNumber())
-                .accountNumber(newTransaction.getAccount().getAccountNumber())
-                .build();
+        return transactionMapper.entityToDto(transactionRepository.save(transaction));
+    }
+
+    public List<TransactionDto> getHistory(Pageable pageable) {
+        Page<Transaction> transactions
+                = transactionRepository.findByRecipientAccountIdOrAccountId(securityService.getAccountId(), securityService.getAccountId(), pageable);
+        if (transactions.hasContent()) {
+            return transactions.getContent().stream().map(transactionMapper::entityToDto).collect(Collectors.toList());
+        }
+        return null;
     }
 }
