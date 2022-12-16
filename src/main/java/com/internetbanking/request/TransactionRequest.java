@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TransactionRequest {
+    private String email;
     private Long recipientAccountNumber;
     private BigDecimal amount;
     private String content;
