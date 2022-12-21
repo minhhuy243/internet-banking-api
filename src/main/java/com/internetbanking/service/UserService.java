@@ -123,6 +123,8 @@ public class UserService {
         return new LoginResponse().toBuilder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .email(user.getEmail())
+                .role(user.getRole().getCode())
                 .build();
     }
 

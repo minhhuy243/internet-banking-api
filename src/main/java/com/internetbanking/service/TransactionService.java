@@ -2,6 +2,7 @@ package com.internetbanking.service;
 
 import com.internetbanking.dto.TransactionDto;
 import com.internetbanking.entity.Account;
+import com.internetbanking.entity.DebtReminder;
 import com.internetbanking.entity.Transaction;
 import com.internetbanking.entity.User;
 import com.internetbanking.entity.type.TransactionStatus;
@@ -14,14 +15,12 @@ import com.internetbanking.request.TransactionRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,6 +35,10 @@ public class TransactionService {
     private final OtpService otpService;
     private final EmailService emailService;
     private final TransactionMapper transactionMapper;
+
+    public TransactionDto getById(Long transactionId) {
+        return transactionMapper.entityToDto(transactionRepository.findById(transactionId).orElseThrow(() -> new RuntimeException("Giao dịch không tồn tại!")));
+    }
 
     @Transactional
     public TransactionDto create(TransactionRequest request) {
@@ -91,11 +94,8 @@ public class TransactionService {
 
     @Transactional
     public TransactionDto validate(Integer otpValue) {
-        Optional<Object> transactionId = Optional.ofNullable(otpService.validateOTP(otpValue));
-        if (!transactionId.isPresent()) {
-            throw new RuntimeException("OTP không hợp lệ!");
-        }
-        Transaction transaction = transactionRepository.findById(Long.valueOf(transactionId.get().toString())).orElseThrow(() -> new RuntimeException());
+        Long transactionId = Long.valueOf(otpService.validateOTP(otpValue).toString());
+        Transaction transaction = transactionRepository.findById(Long.valueOf(transactionId.toString())).orElseThrow(() -> new RuntimeException());
         Account recipientAccount = transaction.getRecipientAccount();
         Account account = transaction.getAccount();
         if (transaction.getStatus() == TransactionStatus.CANCELED) {
@@ -113,13 +113,35 @@ public class TransactionService {
         return transactionMapper.entityToDto(transactionRepository.save(transaction));
     }
 
-    public List<TransactionDto> getHistory(Pageable pageable) {
-        Page<Transaction> transactions
-                = transactionRepository.findByRecipientAccountIdOrAccountId(securityService.getAccountId(), securityService.getAccountId(), pageable);
-        if (transactions.hasContent()) {
-            return transactions.getContent().stream().map(transactionMapper::entityToDto).collect(Collectors.toList());
-        }
-        return null;
+    public Page<TransactionDto> getHistory(Pageable pageable) {
+        Page<Transaction> transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatus(
+                securityService.getAccountId(),
+                securityService.getAccountId(),
+                TransactionStatus.DONE,
+                pageable
+        );
+        return new PageImpl<>(
+                transactions.getContent().stream().map(transactionMapper::entityToDto).collect(Collectors.toList()),
+                transactions.getPageable(),
+                transactions.getTotalElements()
+        );
     }
 
+    public TransactionDto createFromDebtReminder(DebtReminder debtReminder) {
+        Account recipientAccount = debtReminder.getAccount();
+        Account account = debtReminder.getDebtAccount();
+        Transaction transaction = new Transaction().toBuilder()
+                .tradingDate(LocalDateTime.now())
+                .amount(debtReminder.getAmount())
+                .content(debtReminder.getContent())
+                .internal(true)
+                .status(TransactionStatus.DONE)
+                .type(TransactionType.TRANSFER)
+                .recipientAccount(recipientAccount)
+                .account(account)
+                .build();
+        recipientAccount.setBalance(recipientAccount.getBalance().add(transaction.getAmount()));
+        account.setBalance(account.getBalance().subtract(transaction.getAmount()));
+        return transactionMapper.entityToDto(transactionRepository.save(transaction));
+    }
 }

@@ -29,8 +29,7 @@ public class OtpService {
                 });
     }
 
-    public Integer generateOtp(Long value)
-    {
+    public Integer generateOtp(Object value) {
         Random random = new Random();
         Integer otpValue;
         do {
@@ -41,13 +40,14 @@ public class OtpService {
         return otpValue;
     }
 
-    public Object validateOTP(Integer otpValue)
-    {
+    public Object validateOTP(Integer otpValue) {
         Object value = otpCache.getIfPresent(otpValue);
         if (value != null) {
             otpCache.invalidate(otpValue);
             return value;
+        } else {
+            throw new RuntimeException("OTP không hợp lệ!");
         }
-        return null;
     }
+
 }

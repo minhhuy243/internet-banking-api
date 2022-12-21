@@ -6,6 +6,7 @@ import com.internetbanking.request.TransactionRequest;
 import com.internetbanking.service.OtpService;
 import com.internetbanking.service.TransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -13,8 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.xml.ws.Response;
-import java.util.List;
 
 @RestController
 @RequestMapping("/transactions")
@@ -23,9 +22,15 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
-    @GetMapping("history")
+    @GetMapping("/{transactionId}")
+    public ResponseEntity<?> getById(@PathVariable("transactionId") Long transactionId) {
+        TransactionDto results = transactionService.getById(transactionId);
+        return ResponseEntity.ok(results);
+    }
+
+    @GetMapping("history") // thieu filter loai
     public ResponseEntity<?> getHistory(@PageableDefault(value = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
-        List<TransactionDto> results = transactionService.getHistory(pageable);
+        Page<TransactionDto> results = transactionService.getHistory(pageable);
         return ResponseEntity.ok(results);
     }
 
