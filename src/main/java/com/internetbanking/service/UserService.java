@@ -1,5 +1,6 @@
 package com.internetbanking.service;
 
+import com.internetbanking.dto.AccountDto;
 import com.internetbanking.dto.UserDto;
 import com.internetbanking.entity.Account;
 import com.internetbanking.entity.User;
@@ -18,6 +19,9 @@ import com.internetbanking.response.LoginResponse;
 import com.internetbanking.response.RefreshTokenResponse;
 import com.internetbanking.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -33,6 +37,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +54,15 @@ public class UserService {
     private final OtpService otpService;
     private final EmailService emailService;
     private final UserMapper userMapper;
+
+    public Page<UserDto> getAll(Pageable pageable) {
+        Page<User> accounts = userRepository.findAll(pageable);
+        return new PageImpl<>(
+                accounts.getContent().stream().map(userMapper::entityToDto).collect(Collectors.toList()),
+                accounts.getPageable(),
+                accounts.getTotalElements()
+        );
+    }
 
     @Transactional
     public UserDto register(UserRequest request) {
