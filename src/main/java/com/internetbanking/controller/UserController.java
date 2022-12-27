@@ -39,13 +39,13 @@ public class UserController {
     }
 
     @PostMapping("forgot-password")
-    public ResponseEntity<?> forgotPassword() {
-        userService.sendOTPForgotPassword();
+    public ResponseEntity<?> forgotPassword(@RequestParam("email") String email) {
+        userService.sendOTPForgotPassword(email);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("forgot-password/{otpValue}")
-    public ResponseEntity<?> forgotPassword(@PathVariable("otpValue") Integer otpValue, @RequestBody UserRequest request) {
+    @PostMapping("forgot-password/validate")
+    public ResponseEntity<?> forgotPassword(@RequestParam("otpValue") Integer otpValue, @RequestBody UserRequest request) {
         userService.validateForgotPassword(otpValue, request);
         return ResponseEntity.ok().build();
     }

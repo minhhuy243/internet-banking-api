@@ -16,9 +16,9 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class AccountDto {
-    private String fullName;
     private Long accountNumber;
     private LocalDateTime dateOpened;
     private BigDecimal balance;
     private AccountType type;
+    private UserDto user;
 }

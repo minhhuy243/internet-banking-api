@@ -164,19 +164,19 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void sendOTPForgotPassword() {
-        Integer otpValue = otpService.generateOtp(securityService.getUserId());
-        if (!emailService.sendMessage(securityService.getEmail(), otpValue)) {
+    public void sendOTPForgotPassword(String email) {
+        Integer otpValue = otpService.generateOtp(email);
+        if (!emailService.sendMessage(email, otpValue)) {
             throw new RuntimeException("Đã có lỗi xảy ra!");
         }
     }
 
     public void validateForgotPassword(Integer otpValue, UserRequest request) {
-        Optional<Object> userId = Optional.ofNullable(otpService.validateOTP(otpValue));
-        if (!userId.isPresent()) {
+        Optional<Object> email = Optional.ofNullable(otpService.validateOTP(otpValue));
+        if (!email.isPresent()) {
             throw new RuntimeException("OTP không hợp lệ!");
         }
-        User user = userRepository.findById(Long.valueOf(userId.get().toString())).get();
+        User user = userRepository.findByEmail(email.get().toString()).get();
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
     }
