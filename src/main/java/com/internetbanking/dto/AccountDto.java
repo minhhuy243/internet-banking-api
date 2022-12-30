@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,9 +17,15 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class AccountDto {
+    private Long id;
     private Long accountNumber;
     private LocalDateTime dateOpened;
     private BigDecimal balance;
     private AccountType type;
-    private UserDto user;
+
+    private String email;
+    private String fullName;
+    private String phoneNumber;
+    private String address;
+    private LocalDate birthday;
 }

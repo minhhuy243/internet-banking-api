@@ -9,18 +9,21 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class AccountMapper {
 
-    private final UserMapper userMapper;
-
     public AccountDto entityToDto(Account entity) {
         if (entity == null) {
             return null;
         }
         return AccountDto.builder()
+                .id(entity.getId())
                 .accountNumber(entity.getAccountNumber())
                 .dateOpened(entity.getDateOpened())
                 .balance(entity.getBalance())
                 .type(entity.getType())
-                .user(userMapper.entityToDto(entity.getUser()))
+                .email(entity.getUser().getEmail())
+                .fullName(entity.getUser().getFullName())
+                .phoneNumber(entity.getUser().getPhoneNumber())
+                .address(entity.getUser().getAddress())
+                .birthday(entity.getUser().getBirthday())
                 .build();
     }
 }

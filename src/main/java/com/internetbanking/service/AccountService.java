@@ -33,4 +33,9 @@ public class AccountService {
                 accounts.getTotalElements()
         );
     }
+
+    public void delete(Long id) {
+        Account account = accountRepository.findById(id).orElseThrow(() -> new RuntimeException());
+        accountRepository.delete(account);
+    }
 }
