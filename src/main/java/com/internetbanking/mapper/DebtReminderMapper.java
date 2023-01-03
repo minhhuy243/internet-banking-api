@@ -18,8 +18,8 @@ public class DebtReminderMapper {
                 .cancellationReason(entity.getCancellationReason())
                 .status(entity.getStatus())
                 .createdAt(entity.getCreatedAt())
-                .debtAccountNumber(entity.getDebtAccount().getAccountNumber())
-                .accountNumber(entity.getAccount().getAccountNumber())
+                .debtAccountNumber(Long.valueOf(entity.getDebtAccount().getAccountNumber()))
+                .accountNumber(Long.valueOf(entity.getAccount().getAccountNumber()))
                 .build();
     }
 }

@@ -12,9 +12,7 @@ import com.internetbanking.repository.AccountRepository;
 import com.internetbanking.repository.RoleRepository;
 import com.internetbanking.repository.UserRefreshTokenRepository;
 import com.internetbanking.repository.UserRepository;
-import com.internetbanking.request.LoginRequest;
-import com.internetbanking.request.RefreshTokenRequest;
-import com.internetbanking.request.UserRequest;
+import com.internetbanking.request.*;
 import com.internetbanking.response.LoginResponse;
 import com.internetbanking.response.RefreshTokenResponse;
 import com.internetbanking.security.JwtProvider;
@@ -72,6 +70,11 @@ public class UserService {
                 && (!request.getRoleCode().equals("ROLE_CUSTOMER") &&!request.getRoleCode().equals("ROLE_EMPLOYEE"))) {
             throw new RuntimeException("Role không hợp lệ!");
         }
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Địa chỉ Email đã tồn tại");
+        }
+
         User user = new User().toBuilder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -85,18 +88,16 @@ public class UserService {
 
         Random rand = new Random();
         StringBuilder accountNumberSb;
-        Long accountNumber;
         do {
             accountNumberSb = new StringBuilder();
             for (int i = 0; i < 10; i++) {
                 int n = rand.nextInt(10);
                 accountNumberSb.append(n);
             }
-            accountNumber = Long.valueOf(accountNumberSb.toString());
-        } while (accountRepository.findByAccountNumber(accountNumber).isPresent());
+        } while (accountRepository.findByAccountNumber(accountNumberSb.toString()).isPresent());
 
         Account account = new Account().toBuilder()
-                .accountNumber(accountNumber)
+                .accountNumber(accountNumberSb.toString())
                 .dateOpened(LocalDateTime.now())
                 .balance(BigDecimal.ZERO)
                 .type(AccountType.PAYMENT)
@@ -155,7 +156,7 @@ public class UserService {
     }
 
 //    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void changePassword(UserRequest request) {
+    public void changePassword(UserChangePasswordRequest request) {
         User user = userRepository.findById(securityService.getUserId()).get();
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             throw new RuntimeException("Mật khẩu cũ không đúng!");
@@ -179,5 +180,32 @@ public class UserService {
         User user = userRepository.findByEmail(email.get().toString()).get();
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+    }
+
+    public UserDto update(Long id, UserUpdateRequest request) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        if (!user.getEmail().equals(request.getEmail())) {
+            if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+                throw new RuntimeException("Địa chỉ Email đã tồn tại");
+            }
+        }
+
+        if (!user.getPhoneNumber().equals(request.getPhoneNumber())) {
+            if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+                throw new RuntimeException("Số điện thoại đã tồn tại");
+            }
+        }
+
+        if (!request.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        user.setEmail(request.getEmail());
+        user.setFullName(request.getFullName());
+        user.setBirthday(request.getBirthday());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setAddress(request.getAddress());
+
+        return userMapper.entityToDto(userRepository.save(user));
     }
 }

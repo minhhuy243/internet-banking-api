@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class TransactionRequest {
     private String email;
-    private Long recipientAccountNumber;
+    private String recipientAccountNumber;
     private BigDecimal amount;
     private String content;
     private Boolean internal;

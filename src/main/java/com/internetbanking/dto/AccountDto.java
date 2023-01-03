@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class AccountDto {
     private Long id;
+    private Long userId;
     private Long accountNumber;
     private LocalDateTime dateOpened;
     private BigDecimal balance;
@@ -28,4 +29,5 @@ public class AccountDto {
     private String phoneNumber;
     private String address;
     private LocalDate birthday;
+    private String role;
 }

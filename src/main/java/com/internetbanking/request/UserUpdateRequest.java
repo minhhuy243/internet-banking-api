@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -20,17 +19,14 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserRequest {
+public class UserUpdateRequest {
 
     @NotBlank(message = "Email không được bỏ trống")
     @Email(message = "Định dạng Email không hợp lệ")
     private String email;
 
-    @NotBlank(message = "Mật khẩu không được bỏ trống")
-    private String password;
-
     @NotBlank(message = "Tên không được bỏ trống")
-    @Size(min = 3, max = 50)
+    @Size(min = 10, max = 50, message = "Độ dài tên từ {min} - {max}")
     private String fullName;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateUtil.BIRTHDAY_FORMAT)
@@ -41,16 +37,8 @@ public class UserRequest {
     private String phoneNumber;
 
     @NotBlank(message = "Địa chỉ không được bỏ trống")
-    @Size(min = 10, max = 100)
+    @Size(min = 10, max = 100, message = "Độ dài địa chỉ từ {min} - {max}")
     private String address;
 
-    private String roleCode;
-
-//    @NotBlank(message = "Mật khẩu cũ không được bỏ trống")
-//    @Size(min = 6, max = 50)
-    private String oldPassword;
-
-//    @NotBlank(message = "Mật khẩu mới không được bỏ trống")
-//    @Size(min = 6, max = 50)
-    private String newPassword;
+    private String password;
 }

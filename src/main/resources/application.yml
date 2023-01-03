@@ -35,3 +35,4 @@ internet-banking:
     jwt-secret: bimat
     jwt-duration: 900000 # 15 minutes
     jwt-refresh-duration: 604800000 # 7 days
+  firebase-configuration-file: internet-banking-c4ca8-firebase-adminsdk-peder-7b565587a5.json

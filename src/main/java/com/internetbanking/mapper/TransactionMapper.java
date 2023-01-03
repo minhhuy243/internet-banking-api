@@ -18,8 +18,9 @@ public class TransactionMapper {
                 .internal(entity.getInternal())
                 .type(entity.getType())
                 .status(entity.getStatus())
-                .recipientAccountNumber(entity.getRecipientAccount().getAccountNumber())
-                .accountNumber(entity.getAccount().getAccountNumber())
+                .recipientAccountNumber(Long.valueOf(entity.getRecipientAccount().getAccountNumber()))
+                .accountNumber(Long.valueOf(entity.getAccount().getAccountNumber()))
+                .balance(entity.getRecipientAccount().getBalance())
                 .build();
     }
 }

@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,6 +121,32 @@ public class TransactionService {
                 TransactionStatus.DONE,
                 pageable
         );
+        return new PageImpl<>(
+                transactions.getContent().stream().map(transactionMapper::entityToDto).collect(Collectors.toList()),
+                transactions.getPageable(),
+                transactions.getTotalElements()
+        );
+    }
+
+    public Page<TransactionDto> getHistoryByAccountId(Long accountId, TransactionType type, Pageable pageable) {
+        Page<Transaction> transactions;
+        if (type != null) {
+            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatusAndType(
+                    accountId,
+                    accountId,
+                    TransactionStatus.DONE,
+                    type,
+                    pageable
+            );
+        } else {
+            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatus(
+                    accountId,
+                    accountId,
+                    TransactionStatus.DONE,
+                    pageable
+            );
+        }
+
         return new PageImpl<>(
                 transactions.getContent().stream().map(transactionMapper::entityToDto).collect(Collectors.toList()),
                 transactions.getPageable(),

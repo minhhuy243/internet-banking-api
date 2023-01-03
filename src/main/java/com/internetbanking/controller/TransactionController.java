@@ -2,6 +2,7 @@ package com.internetbanking.controller;
 
 import com.internetbanking.dto.TransactionDto;
 import com.internetbanking.entity.Transaction;
+import com.internetbanking.entity.type.TransactionType;
 import com.internetbanking.request.TransactionRequest;
 import com.internetbanking.service.OtpService;
 import com.internetbanking.service.TransactionService;
@@ -31,6 +32,14 @@ public class TransactionController {
     @GetMapping("history") // thieu filter loai
     public ResponseEntity<?> getHistory(@PageableDefault(value = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
         Page<TransactionDto> results = transactionService.getHistory(pageable);
+        return ResponseEntity.ok(results);
+    }
+
+    @GetMapping("history/{accountId}") // thieu filter loai
+    public ResponseEntity<?> getHistoryById(@PathVariable("accountId") Long accountId,
+                                            @RequestParam(name = "type", required = false) TransactionType type,
+                                            @PageableDefault(value = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<TransactionDto> results = transactionService.getHistoryByAccountId(accountId, type, pageable);
         return ResponseEntity.ok(results);
     }
 

@@ -37,7 +37,7 @@ public class User extends JpaEntity {
     private LocalDate birthday;
 
     @NotBlank(message = "Số điện thoại không được bỏ trống")
-    @Pattern(regexp = "(^((?=(0))[0-9]{10})$)")
+    @Pattern(regexp = "(^((?=(0))[0-9]{10})$)", message = "Số điện thoại không đúng định dạng")
     @Column(unique = true, nullable = false)
     private String phoneNumber;
 

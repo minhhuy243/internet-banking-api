@@ -36,4 +36,6 @@ public class TransactionDto {
     private Long recipientAccountNumber;
 
     private Long accountNumber;
+
+    private BigDecimal balance;
 }

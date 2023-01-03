@@ -17,6 +17,6 @@ import javax.validation.constraints.NotBlank;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class RecipientAccountRequest {
-    private Long recipientAccountNumber;
+    private String recipientAccountNumber;
     private String reminiscentName;
 }

@@ -15,5 +15,5 @@ public class DebtReminderRequest {
     private BigDecimal amount;
     private String content;
     private String cancellationReason;
-    private Long debtAccountNumber;
+    private String debtAccountNumber;
 }

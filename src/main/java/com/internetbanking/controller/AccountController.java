@@ -8,6 +8,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/accounts")
 @RequiredArgsConstructor
@@ -21,8 +23,9 @@ public class AccountController {
     }
 
     @GetMapping("")
-    public ResponseEntity<?> getAll(@PageableDefault(value = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(accountService.getAll(pageable));
+    public ResponseEntity<?> getAll(@RequestParam Map<String, String> allParams,
+                                    @PageableDefault(value = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(accountService.getAll(allParams, pageable));
     }
 
     @DeleteMapping("/{id}")

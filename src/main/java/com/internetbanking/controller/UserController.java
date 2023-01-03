@@ -2,7 +2,9 @@ package com.internetbanking.controller;
 
 import com.internetbanking.dto.UserDto;
 import com.internetbanking.entity.User;
+import com.internetbanking.request.UserChangePasswordRequest;
 import com.internetbanking.request.UserRequest;
+import com.internetbanking.request.UserUpdateRequest;
 import com.internetbanking.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +35,7 @@ public class UserController {
     }
 
     @PostMapping("change-password")
-    public ResponseEntity<?> changePassword(@RequestBody UserRequest request) {
+    public ResponseEntity<?> changePassword(@Valid @RequestBody UserChangePasswordRequest request) {
         userService.changePassword(request);
         return ResponseEntity.ok().build();
     }
@@ -48,5 +50,10 @@ public class UserController {
     public ResponseEntity<?> forgotPassword(@RequestParam("otpValue") Integer otpValue, @RequestBody UserRequest request) {
         userService.validateForgotPassword(otpValue, request);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable("id") Long id, @Valid @RequestBody UserUpdateRequest request) {
+        return ResponseEntity.ok(userService.update(id, request));
     }
 }

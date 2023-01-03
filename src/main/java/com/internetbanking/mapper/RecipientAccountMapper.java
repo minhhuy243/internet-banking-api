@@ -12,7 +12,7 @@ public class RecipientAccountMapper {
     public RecipientAccountDto entityToDto(RecipientAccount entity) {
         return RecipientAccountDto.builder()
                 .id(entity.getId())
-                .recipientAccountNumber(entity.getRecipientAccount().getAccountNumber())
+                .recipientAccountNumber(Long.valueOf(entity.getRecipientAccount().getAccountNumber()))
                 .recipientAccountName(entity.getRecipientAccount().getUser().getFullName())
                 .reminiscentName(entity.getReminiscentName())
                 .build();
