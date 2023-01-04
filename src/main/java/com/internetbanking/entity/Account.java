@@ -26,6 +26,8 @@ public class Account extends JpaEntity {
 
     private AccountType type;
 
+    private boolean active = true;
+
     @OneToOne(fetch = FetchType.LAZY)
     private User user;
 

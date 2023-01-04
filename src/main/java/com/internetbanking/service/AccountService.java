@@ -60,7 +60,29 @@ public class AccountService {
     }
 
     public void delete(Long id) {
-        Account account = accountRepository.findById(id).orElseThrow(() -> new RuntimeException());
+        Account account = accountRepository.findById(id).orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
         accountRepository.delete(account);
+    }
+
+    public void lock(Long id) {
+        Account account;
+        if (id == null) {
+            account = accountRepository.findById(securityService.getAccountId()).orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+        } else {
+            account = accountRepository.findById(id).orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+        }
+        account.setActive(false);
+        accountRepository.save(account);
+    }
+
+    public void unlock(Long id) {
+        Account account;
+        if (id == null) {
+            account = accountRepository.findById(securityService.getAccountId()).orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+        } else {
+            account = accountRepository.findById(id).orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
+        }
+        account.setActive(true);
+        accountRepository.save(account);
     }
 }

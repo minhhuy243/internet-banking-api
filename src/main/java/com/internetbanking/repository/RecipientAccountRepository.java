@@ -1,6 +1,8 @@
 package com.internetbanking.repository;
 
 import com.internetbanking.entity.RecipientAccount;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,5 +14,5 @@ public interface RecipientAccountRepository extends JpaRepository<RecipientAccou
 
     Optional<RecipientAccount> findByIdAndAccountId(Long id, Long accountId);
     Optional<RecipientAccount> findByRecipientAccount_AccountNumberAndAccount_Id(String accountNumber, Long id);
-    List<RecipientAccount> findByAccountId(Long accountId);
+    Page<RecipientAccount> findByAccountId(Long accountId, Pageable pageable);
 }

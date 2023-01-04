@@ -33,4 +33,28 @@ public class AccountController {
         accountService.delete(id);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/lock")
+    public ResponseEntity<?> lock() {
+        accountService.lock(null);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/lock/{id}")
+    public ResponseEntity<?> lockById(@PathVariable("id") Long id) {
+        accountService.lock(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/unlock")
+    public ResponseEntity<?> unlock() {
+        accountService.unlock(null);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/unlock/{id}")
+    public ResponseEntity<?> unlockById(@PathVariable("id") Long id) {
+        accountService.unlock(id);
+        return ResponseEntity.ok().build();
+    }
 }

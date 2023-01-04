@@ -101,6 +101,7 @@ public class UserService {
                 .dateOpened(LocalDateTime.now())
                 .balance(BigDecimal.ZERO)
                 .type(AccountType.PAYMENT)
+                .active(true)
                 .user(newUser)
                 .build();
         newUser.setAccount(account);

@@ -46,6 +46,13 @@ public class TransactionService {
         if (request.getType() == TransactionType.TRANSFER) {
             Account recipientAccount = accountRepository.findByAccountNumber(request.getRecipientAccountNumber()).orElseThrow(() -> new RuntimeException("Tài khoản người nhận không tồn tại!"));
             Account account = accountRepository.findById(securityService.getAccountId()).orElseThrow(() -> new RuntimeException("Tài khoản người gửi không tồn tại!"));
+
+            if (!account.isActive()) {
+                throw new RuntimeException("Tài khoản đã bị khoá. Không thể thực hiện giao dịch!");
+            }
+            if (!recipientAccount.isActive()) {
+                throw new RuntimeException("Tài khoản người nhận đã bị khoá. Không thể thực hiện giao dịch!");
+            }
             if (request.getAmount().compareTo(account.getBalance()) > 0) {
                 throw new RuntimeException("Tài khoản không đủ số dư!");
             }
@@ -99,6 +106,12 @@ public class TransactionService {
         Transaction transaction = transactionRepository.findById(Long.valueOf(transactionId.toString())).orElseThrow(() -> new RuntimeException());
         Account recipientAccount = transaction.getRecipientAccount();
         Account account = transaction.getAccount();
+        if (!account.isActive()) {
+            throw new RuntimeException("Tài khoản đã bị khoá. Không thể thực hiện giao dịch!");
+        }
+        if (!recipientAccount.isActive()) {
+            throw new RuntimeException("Tài khoản người nhận đã bị khoá. Không thể thực hiện giao dịch!");
+        }
         if (transaction.getStatus() == TransactionStatus.CANCELED) {
             throw new RuntimeException("Giao dịch đã bị huỷ!");
         }

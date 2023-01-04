@@ -8,6 +8,9 @@ import com.internetbanking.repository.AccountRepository;
 import com.internetbanking.repository.RecipientAccountRepository;
 import com.internetbanking.request.RecipientAccountRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,12 +26,21 @@ public class RecipientAccountService {
     private final SecurityService securityService;
     private final RecipientAccountMapper recipientAccountMapper;
 
-    public List<RecipientAccountDto> getByAccountId() {
-        return recipientAccountRepository.findByAccountId(securityService.getAccountId())
-                .stream().map(recipientAccountMapper::entityToDto).collect(Collectors.toList());
+    public Page<RecipientAccountDto> getByAccountId(Pageable pageable) {
+        Page<RecipientAccount> recipientAccounts = recipientAccountRepository.findByAccountId(securityService.getAccountId(), pageable);
+        return new PageImpl<>(
+                recipientAccounts.getContent().stream().map(recipientAccountMapper::entityToDto).collect(Collectors.toList()),
+                recipientAccounts.getPageable(),
+                recipientAccounts.getTotalElements()
+        );
     }
 
     public RecipientAccountDto create(RecipientAccountRequest request) {
+        Account myAccount = accountRepository.findById(securityService.getAccountId()).orElseThrow(() -> new RuntimeException());
+        if (request.getRecipientAccountNumber().equals(myAccount.getAccountNumber())) {
+            throw new RuntimeException("Không thể thêm chính bạn vào danh sách người nhận!");
+        }
+
         Optional<RecipientAccount> recipientAccountEntity
                 = recipientAccountRepository.findByRecipientAccount_AccountNumberAndAccount_Id(request.getRecipientAccountNumber(), securityService.getAccountId());
         if (recipientAccountEntity.isPresent()) {

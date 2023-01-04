@@ -61,6 +61,12 @@ public class DebtReminderService {
         Account debtAccount = accountRepository.findByAccountNumber(request.getDebtAccountNumber())
                 .orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại!"));
         Account account = accountRepository.findById(securityService.getAccountId()).orElseThrow(() -> new RuntimeException());
+        if (!account.isActive()) {
+            throw new RuntimeException("Tài khoản đã bị khoá. Không thể tạo nhắc nợ!");
+        }
+        if (!debtAccount.isActive()) {
+            throw new RuntimeException("Tài khoản người nợ đã bị khoá. Không thể tạo nhắc nợ!");
+        }
         DebtReminder debtReminder = new DebtReminder().toBuilder()
                 .content(request.getContent())
                 .amount(request.getAmount())
@@ -93,6 +99,14 @@ public class DebtReminderService {
         if (debtReminder.getStatus() == DebtReminderStatus.PAID) {
             throw new RuntimeException("Nhắc nợ đã thanh toán!");
         }
+        Account account = debtReminder.getAccount();
+        Account debtAccount = debtReminder.getDebtAccount();
+        if (!account.isActive()) {
+            throw new RuntimeException("Tài khoản đã bị khoá. Không thể tạo nhắc nợ!");
+        }
+        if (!debtAccount.isActive()) {
+            throw new RuntimeException("Tài khoản người nợ đã bị khoá. Không thể tạo nhắc nợ!");
+        }
         Integer otpValue = otpService.generateOtp(debtReminder.getId());
         emailService.sendMessage(securityService.getEmail(), otpValue);
     }
@@ -103,6 +117,14 @@ public class DebtReminderService {
         DebtReminder debtReminder = debtReminderRepository.findById(debtReminderId).orElseThrow(() -> new RuntimeException("Nhắc nợ không tồn tại!"));
         if (!debtReminder.getActive()) {
             throw new RuntimeException("Nhắc nợ đã bị huỷ!");
+        }
+        Account account = debtReminder.getAccount();
+        Account debtAccount = debtReminder.getDebtAccount();
+        if (!account.isActive()) {
+            throw new RuntimeException("Tài khoản đã bị khoá. Không thể tạo nhắc nợ!");
+        }
+        if (!debtAccount.isActive()) {
+            throw new RuntimeException("Tài khoản người nợ đã bị khoá. Không thể tạo nhắc nợ!");
         }
         debtReminder.setStatus(DebtReminderStatus.PAID);
         DebtReminder newDebtReminder = debtReminderRepository.save(debtReminder);
