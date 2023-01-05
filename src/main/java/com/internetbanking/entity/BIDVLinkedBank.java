@@ -4,7 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 
-@Entity
+@Entity(name = "BIDV_linked_bank")
 @Getter
 @Setter
 @NoArgsConstructor
