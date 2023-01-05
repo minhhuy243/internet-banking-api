@@ -127,13 +127,24 @@ public class TransactionService {
         return transactionMapper.entityToDto(transactionRepository.save(transaction));
     }
 
-    public Page<TransactionDto> getHistory(Pageable pageable) {
-        Page<Transaction> transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatus(
-                securityService.getAccountId(),
-                securityService.getAccountId(),
-                TransactionStatus.DONE,
-                pageable
-        );
+    public Page<TransactionDto> getHistory(TransactionType type, Pageable pageable) {
+        Page<Transaction> transactions;
+        if (type != null) {
+            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatusAndType(
+                    securityService.getAccountId(),
+                    securityService.getAccountId(),
+                    TransactionStatus.DONE,
+                    type,
+                    pageable
+            );
+        } else {
+            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatus(
+                    securityService.getAccountId(),
+                    securityService.getAccountId(),
+                    TransactionStatus.DONE,
+                    pageable
+            );
+        }
         return new PageImpl<>(
                 transactions.getContent().stream().map(transactionMapper::entityToDto).collect(Collectors.toList()),
                 transactions.getPageable(),

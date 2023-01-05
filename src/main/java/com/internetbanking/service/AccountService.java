@@ -31,6 +31,14 @@ public class AccountService {
         return accountMapper.entityToDto(account);
     }
 
+    public AccountDto getByAccountNumber(Long accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber.toString()).orElseThrow(() -> new RuntimeException("Tài khoản không tồn tại"));
+        if (!account.isActive()) {
+            throw new RuntimeException("Tài khoản đã bị khoá");
+        }
+        return accountMapper.entityToDto(account);
+    }
+
     public Page<AccountDto> getAll(Map<String, String> allParams, Pageable pageable) {
         Specification<Account> accountSpec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();

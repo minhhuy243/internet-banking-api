@@ -28,6 +28,11 @@ public class AccountController {
         return ResponseEntity.ok(accountService.getAll(allParams, pageable));
     }
 
+    @GetMapping("/{accountNumber}")
+    public ResponseEntity<?> getByAccountNumber(@PathVariable("accountNumber") Long accountNumber) {
+        return ResponseEntity.ok(accountService.getByAccountNumber(accountNumber));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id) {
         accountService.delete(id);

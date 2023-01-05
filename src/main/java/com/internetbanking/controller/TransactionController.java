@@ -30,13 +30,14 @@ public class TransactionController {
     }
 
     @GetMapping("history") // thieu filter loai
-    public ResponseEntity<?> getHistory(@PageableDefault(value = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<TransactionDto> results = transactionService.getHistory(pageable);
+    public ResponseEntity<?> getHistory(@PageableDefault(value = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,
+                                        @RequestParam(name = "type", required = false) TransactionType type) {
+        Page<TransactionDto> results = transactionService.getHistory(type, pageable);
         return ResponseEntity.ok(results);
     }
 
-    @GetMapping("history/{accountId}") // thieu filter loai
-    public ResponseEntity<?> getHistoryById(@PathVariable("accountId") Long accountId,
+    @GetMapping("history/{accountId}")
+    public ResponseEntity<?> getHistoryByAccountId(@PathVariable("accountId") Long accountId,
                                             @RequestParam(name = "type", required = false) TransactionType type,
                                             @PageableDefault(value = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
         Page<TransactionDto> results = transactionService.getHistoryByAccountId(accountId, type, pageable);
