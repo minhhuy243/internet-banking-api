@@ -23,6 +23,7 @@ public class AccountDto {
     private LocalDateTime dateOpened;
     private BigDecimal balance;
     private AccountType type;
+    private boolean active;
 
     private String email;
     private String fullName;

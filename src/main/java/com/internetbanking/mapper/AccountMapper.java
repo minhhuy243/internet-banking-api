@@ -23,6 +23,7 @@ public class AccountMapper {
                 .dateOpened(entity.getDateOpened())
                 .balance(entity.getBalance())
                 .type(entity.getType())
+                .active(entity.isActive())
                 .email(entity.getUser().getEmail())
                 .fullName(entity.getUser().getFullName())
                 .phoneNumber(entity.getUser().getPhoneNumber())
