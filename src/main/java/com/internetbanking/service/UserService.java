@@ -168,7 +168,7 @@ public class UserService {
 
     public void sendOTPForgotPassword(String email) {
         Integer otpValue = otpService.generateOtp(email);
-        if (!emailService.sendMessage(email, otpValue)) {
+        if (!emailService.sendMessage(email, otpValue, "FORGOT_PASSWORD")) {
             throw new RuntimeException("Đã có lỗi xảy ra!");
         }
     }

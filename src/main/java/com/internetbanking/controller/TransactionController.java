@@ -33,8 +33,8 @@ public class TransactionController {
     @GetMapping("history") // thieu filter loai
     public ResponseEntity<?> getHistory(@PageableDefault(value = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,
                                         @RequestParam(name = "type", required = false) String type,
-                                        @RequestParam(name = "startFrom", required = false) Instant startFrom,
-                                        @RequestParam(name = "endFrom", required = false) Instant endFrom) {
+                                        @RequestParam(name = "startFrom", required = false) Long startFrom,
+                                        @RequestParam(name = "endFrom", required = false) Long endFrom) {
         Page<TransactionDto> results = transactionService.getHistory(type, startFrom, endFrom, pageable);
         return ResponseEntity.ok(results);
     }
@@ -42,8 +42,8 @@ public class TransactionController {
     @GetMapping("history/{accountId}")
     public ResponseEntity<?> getHistoryByAccountId(@PathVariable("accountId") Long accountId,
                                                    @RequestParam(name = "type", required = false) String type,
-                                                   @RequestParam(name = "startFrom", required = false) Instant startFrom,
-                                                   @RequestParam(name = "endFrom", required = false) Instant endFrom,
+                                                   @RequestParam(name = "startFrom", required = false) Long startFrom,
+                                                   @RequestParam(name = "endFrom", required = false) Long endFrom,
                                             @PageableDefault(value = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
         Page<TransactionDto> results = transactionService.getHistoryByAccountId(accountId, type, startFrom, endFrom, pageable);
         return ResponseEntity.ok(results);

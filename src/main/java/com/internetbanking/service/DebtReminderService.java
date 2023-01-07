@@ -108,7 +108,7 @@ public class DebtReminderService {
             throw new RuntimeException("Tài khoản người nợ đã bị khoá. Không thể tạo nhắc nợ!");
         }
         Integer otpValue = otpService.generateOtp(debtReminder.getId());
-        emailService.sendMessage(securityService.getEmail(), otpValue);
+        emailService.sendMessage(securityService.getEmail(), otpValue, "TRANSACTION");
     }
 
     @Transactional

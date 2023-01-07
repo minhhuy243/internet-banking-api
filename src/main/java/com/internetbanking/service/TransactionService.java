@@ -78,7 +78,7 @@ public class TransactionService {
             Transaction newTransaction = transactionRepository.saveAndFlush(transaction);
 
             Integer otpValue = otpService.generateOtp(newTransaction.getId());
-            if (!emailService.sendMessage(securityService.getEmail(), otpValue)) {
+            if (!emailService.sendMessage(securityService.getEmail(), otpValue, "TRANSACTION")) {
                 newTransaction.setStatus(TransactionStatus.ERROR);
                 transactionRepository.save(newTransaction);
             }
@@ -140,40 +140,38 @@ public class TransactionService {
         return transactionMapper.entityToDto(transactionRepository.save(transaction));
     }
 
-    public Page<TransactionDto> getHistory(String type, Instant startFrom, Instant endFrom, Pageable pageable) {
+    public Page<TransactionDto> getHistory(String type, Long startFrom, Long endFrom, Pageable pageable) {
         Page<Transaction> transactions;
-//        if (type != null) {
-//            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatusAndType(
-//                    securityService.getAccountId(),
-//                    securityService.getAccountId(),
-//                    TransactionStatus.DONE,
-//                    type,
-//                    pageable
-//            );
-//        } else {
-//            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatus(
-//                    securityService.getAccountId(),
-//                    securityService.getAccountId(),
-//                    TransactionStatus.DONE,
-//                    pageable
-//            );
-//        }
         Specification<Transaction> transactionSpecification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            if (type.equalsIgnoreCase("transfer")) {
-                predicates.add(cb.equal(root.get("type"), TransactionType.TRANSFER));
-                predicates.add(cb.equal(root.get("account").get("id"), securityService.getAccountId()));
-            }
-            if (type.equalsIgnoreCase("receive")) {
-                predicates.add(cb.equal(root.get("recipientAccount").get("id"), securityService.getAccountId()));
+            predicates.add(cb.equal(root.get("status"), TransactionStatus.DONE));
+
+            if (type != null) {
+                if (type.equalsIgnoreCase("transfer")) {
+                    predicates.add(cb.equal(root.get("type"), TransactionType.TRANSFER));
+                    predicates.add(cb.equal(root.get("account").get("id"), securityService.getAccountId()));
+                }
+                if (type.equalsIgnoreCase("receive")) {
+                    predicates.add(cb.equal(root.get("recipientAccount").get("id"), securityService.getAccountId()));
+                }
             }
             if (startFrom != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("tradingDate"), LocalDateTime.ofInstant(startFrom, ZoneOffset.UTC)));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("tradingDate"), Instant.ofEpochMilli(startFrom).atZone(ZoneOffset.UTC).toLocalDateTime()));
             }
             if (endFrom != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("tradingDate"), LocalDateTime.ofInstant(endFrom, ZoneOffset.UTC)));
+                predicates.add(cb.lessThanOrEqualTo(root.get("tradingDate"), Instant.ofEpochMilli(endFrom).atZone(ZoneOffset.UTC).toLocalDateTime()));
             }
-            return cb.and(predicates.toArray(new Predicate[0]));
+            Predicate predicateAnd = cb.and(predicates.toArray(new Predicate[0]));
+            Predicate predicateOr = null;
+            if (type == null || type.isEmpty()) {
+                predicateOr = cb.or(cb.equal(root.get("account").get("id"), securityService.getAccountId()),
+                        cb.equal(root.get("recipientAccount").get("id"), securityService.getAccountId()));
+            }
+
+            if (predicateOr == null) {
+                return predicateAnd;
+            }
+            return cb.and(predicateAnd, predicateOr);
         };
         transactions = transactionRepository.findAll(transactionSpecification, pageable);
         return new PageImpl<>(
@@ -183,41 +181,36 @@ public class TransactionService {
         );
     }
 
-    public Page<TransactionDto> getHistoryByAccountId(Long accountId, String type, Instant startFrom, Instant endFrom, Pageable pageable) {
+    public Page<TransactionDto> getHistoryByAccountId(Long accountId, String type, Long startFrom, Long endFrom, Pageable pageable) {
         Page<Transaction> transactions;
-//        if (type != null) {
-//            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatusAndType(
-//                    accountId,
-//                    accountId,
-//                    TransactionStatus.DONE,
-//                    type,
-//                    pageable
-//            );
-//        } else {
-//            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatus(
-//                    accountId,
-//                    accountId,
-//                    TransactionStatus.DONE,
-//                    pageable
-//            );
-//        }
-
         Specification<Transaction> transactionSpecification = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            if (type.equalsIgnoreCase("transfer")) {
-                predicates.add(cb.equal(root.get("type"), TransactionType.TRANSFER));
-                predicates.add(cb.equal(root.get("account").get("id"), accountId));
-            }
-            if (type.equalsIgnoreCase("receive")) {
-                predicates.add(cb.equal(root.get("recipientAccount").get("id"), accountId));
+            if (type != null) {
+                if (type.equalsIgnoreCase("transfer")) {
+                    predicates.add(cb.equal(root.get("type"), TransactionType.TRANSFER));
+                    predicates.add(cb.equal(root.get("account").get("id"), accountId));
+                }
+                if (type.equalsIgnoreCase("receive")) {
+                    predicates.add(cb.equal(root.get("recipientAccount").get("id"), accountId));
+                }
             }
             if (startFrom != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("tradingDate"), LocalDateTime.ofInstant(startFrom, ZoneOffset.UTC)));
+                predicates.add(cb.greaterThanOrEqualTo(root.get("tradingDate"), Instant.ofEpochMilli(startFrom).atZone(ZoneOffset.UTC).toLocalDateTime()));
             }
             if (endFrom != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("tradingDate"), LocalDateTime.ofInstant(endFrom, ZoneOffset.UTC)));
+                predicates.add(cb.lessThanOrEqualTo(root.get("tradingDate"), Instant.ofEpochMilli(endFrom).atZone(ZoneOffset.UTC).toLocalDateTime()));
             }
-            return cb.and(predicates.toArray(new Predicate[0]));
+            Predicate predicateAnd = cb.and(predicates.toArray(new Predicate[0]));
+            Predicate predicateOr = null;
+            if (type == null || type.isEmpty()) {
+                predicateOr = cb.or(cb.equal(root.get("account").get("id"), accountId),
+                        cb.equal(root.get("recipientAccount").get("id"), accountId));
+            }
+
+            if (predicateOr == null) {
+                return predicateAnd;
+            }
+            return cb.and(predicateAnd, predicateOr);
         };
         transactions = transactionRepository.findAll(transactionSpecification, pageable);
 
