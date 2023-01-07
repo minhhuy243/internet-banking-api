@@ -22,8 +22,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,11 +64,13 @@ public class TransactionService {
                 throw new RuntimeException("Tài khoản không đủ số dư!");
             }
             Transaction transaction = new Transaction().toBuilder()
-                    .tradingDate(LocalDateTime.now())
+                    .tradingDate(LocalDate.now().atStartOfDay())
                     .amount(request.getAmount())
                     .content(request.getContent())
                     .internal(request.getInternal())
                     .status(TransactionStatus.VERIFYING)
+                    .balanceOfRecipientAccount(BigDecimal.ZERO)
+                    .balanceOfAccount(BigDecimal.ZERO)
                     .type(request.getType())
                     .recipientAccount(recipientAccount)
                     .account(account)
@@ -93,6 +98,8 @@ public class TransactionService {
                     .content(request.getContent())
                     .internal(request.getInternal())
                     .status(TransactionStatus.DONE)
+                    .balanceOfAccount(BigDecimal.ZERO)
+                    .balanceOfRecipientAccount(recipientAccount.getBalance().add(request.getAmount()))
                     .type(request.getType())
                     .recipientAccount(recipientAccount)
                     .account(account)
@@ -125,34 +132,50 @@ public class TransactionService {
         }
         if (transaction.getType() == TransactionType.TRANSFER) {
             transaction.setStatus(TransactionStatus.DONE);
+            transaction.setBalanceOfRecipientAccount(recipientAccount.getBalance().add(transaction.getAmount()));
+            transaction.setBalanceOfAccount(account.getBalance().subtract(transaction.getAmount()));
             recipientAccount.setBalance(recipientAccount.getBalance().add(transaction.getAmount()));
             account.setBalance(account.getBalance().subtract(transaction.getAmount()));
         }
         return transactionMapper.entityToDto(transactionRepository.save(transaction));
     }
 
-    public Page<TransactionDto> getHistory(TransactionType type, Instant fromDate, Instant toDate, Pageable pageable) {
+    public Page<TransactionDto> getHistory(String type, Instant startFrom, Instant endFrom, Pageable pageable) {
         Page<Transaction> transactions;
-        if (type != null) {
-            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatusAndType(
-                    securityService.getAccountId(),
-                    securityService.getAccountId(),
-                    TransactionStatus.DONE,
-                    type,
-                    pageable
-            );
-        } else {
-            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatus(
-                    securityService.getAccountId(),
-                    securityService.getAccountId(),
-                    TransactionStatus.DONE,
-                    pageable
-            );
-        }
-//        Specification<Transaction> transactionSpecification = (root, query, cb) -> {
-//            List<Predicate> predicates = new ArrayList<>();
-//            predicates.add();
+//        if (type != null) {
+//            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatusAndType(
+//                    securityService.getAccountId(),
+//                    securityService.getAccountId(),
+//                    TransactionStatus.DONE,
+//                    type,
+//                    pageable
+//            );
+//        } else {
+//            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatus(
+//                    securityService.getAccountId(),
+//                    securityService.getAccountId(),
+//                    TransactionStatus.DONE,
+//                    pageable
+//            );
 //        }
+        Specification<Transaction> transactionSpecification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (type.equalsIgnoreCase("transfer")) {
+                predicates.add(cb.equal(root.get("type"), TransactionType.TRANSFER));
+                predicates.add(cb.equal(root.get("account").get("id"), securityService.getAccountId()));
+            }
+            if (type.equalsIgnoreCase("receive")) {
+                predicates.add(cb.equal(root.get("recipientAccount").get("id"), securityService.getAccountId()));
+            }
+            if (startFrom != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("tradingDate"), LocalDateTime.ofInstant(startFrom, ZoneOffset.UTC)));
+            }
+            if (endFrom != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("tradingDate"), LocalDateTime.ofInstant(endFrom, ZoneOffset.UTC)));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        transactions = transactionRepository.findAll(transactionSpecification, pageable);
         return new PageImpl<>(
                 transactions.getContent().stream().map(transactionMapper::entityToDto).collect(Collectors.toList()),
                 transactions.getPageable(),
@@ -160,24 +183,43 @@ public class TransactionService {
         );
     }
 
-    public Page<TransactionDto> getHistoryByAccountId(Long accountId, TransactionType type, Pageable pageable) {
+    public Page<TransactionDto> getHistoryByAccountId(Long accountId, String type, Instant startFrom, Instant endFrom, Pageable pageable) {
         Page<Transaction> transactions;
-        if (type != null) {
-            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatusAndType(
-                    accountId,
-                    accountId,
-                    TransactionStatus.DONE,
-                    type,
-                    pageable
-            );
-        } else {
-            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatus(
-                    accountId,
-                    accountId,
-                    TransactionStatus.DONE,
-                    pageable
-            );
-        }
+//        if (type != null) {
+//            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatusAndType(
+//                    accountId,
+//                    accountId,
+//                    TransactionStatus.DONE,
+//                    type,
+//                    pageable
+//            );
+//        } else {
+//            transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatus(
+//                    accountId,
+//                    accountId,
+//                    TransactionStatus.DONE,
+//                    pageable
+//            );
+//        }
+
+        Specification<Transaction> transactionSpecification = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (type.equalsIgnoreCase("transfer")) {
+                predicates.add(cb.equal(root.get("type"), TransactionType.TRANSFER));
+                predicates.add(cb.equal(root.get("account").get("id"), accountId));
+            }
+            if (type.equalsIgnoreCase("receive")) {
+                predicates.add(cb.equal(root.get("recipientAccount").get("id"), accountId));
+            }
+            if (startFrom != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("tradingDate"), LocalDateTime.ofInstant(startFrom, ZoneOffset.UTC)));
+            }
+            if (endFrom != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("tradingDate"), LocalDateTime.ofInstant(endFrom, ZoneOffset.UTC)));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        transactions = transactionRepository.findAll(transactionSpecification, pageable);
 
         return new PageImpl<>(
                 transactions.getContent().stream().map(transactionMapper::entityToDto).collect(Collectors.toList()),
@@ -196,6 +238,8 @@ public class TransactionService {
                 .internal(true)
                 .status(TransactionStatus.DONE)
                 .type(TransactionType.TRANSFER)
+                .balanceOfRecipientAccount(recipientAccount.getBalance().add(debtReminder.getAmount()))
+                .balanceOfAccount(account.getBalance().subtract(debtReminder.getAmount()))
                 .recipientAccount(recipientAccount)
                 .account(account)
                 .build();

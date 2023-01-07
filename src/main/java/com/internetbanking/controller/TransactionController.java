@@ -32,18 +32,20 @@ public class TransactionController {
 
     @GetMapping("history") // thieu filter loai
     public ResponseEntity<?> getHistory(@PageableDefault(value = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,
-                                        @RequestParam(name = "type", required = false) TransactionType type,
-                                        @RequestParam(name = "fromDate", required = false) Instant fromDate,
-                                        @RequestParam(name = "toDate", required = false) Instant toDate) {
-        Page<TransactionDto> results = transactionService.getHistory(type, fromDate, toDate, pageable);
+                                        @RequestParam(name = "type", required = false) String type,
+                                        @RequestParam(name = "startFrom", required = false) Instant startFrom,
+                                        @RequestParam(name = "endFrom", required = false) Instant endFrom) {
+        Page<TransactionDto> results = transactionService.getHistory(type, startFrom, endFrom, pageable);
         return ResponseEntity.ok(results);
     }
 
     @GetMapping("history/{accountId}")
     public ResponseEntity<?> getHistoryByAccountId(@PathVariable("accountId") Long accountId,
-                                            @RequestParam(name = "type", required = false) TransactionType type,
+                                                   @RequestParam(name = "type", required = false) String type,
+                                                   @RequestParam(name = "startFrom", required = false) Instant startFrom,
+                                                   @RequestParam(name = "endFrom", required = false) Instant endFrom,
                                             @PageableDefault(value = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<TransactionDto> results = transactionService.getHistoryByAccountId(accountId, type, pageable);
+        Page<TransactionDto> results = transactionService.getHistoryByAccountId(accountId, type, startFrom, endFrom, pageable);
         return ResponseEntity.ok(results);
     }
 

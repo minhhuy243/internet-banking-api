@@ -33,6 +33,10 @@ public class Transaction extends JpaEntity {
 
     private TransactionStatus status;
 
+    private BigDecimal balanceOfRecipientAccount;
+
+    private BigDecimal balanceOfAccount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private Account recipientAccount;
 
