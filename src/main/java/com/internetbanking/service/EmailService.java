@@ -53,7 +53,7 @@ public class EmailService {
                     "  </div>\n" +
                     "</div>";
         }
-        helper.setText(content);
+        helper.setText(content, true);
         Boolean isSent = false;
         try {
             emailSender.send(mimeMessage);
