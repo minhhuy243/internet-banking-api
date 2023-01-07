@@ -231,6 +231,15 @@ public class TransactionService {
     public TransactionDto createFromDebtReminder(DebtReminder debtReminder) {
         Account recipientAccount = debtReminder.getAccount();
         Account account = debtReminder.getDebtAccount();
+        if (!account.isActive()) {
+            throw new RuntimeException("Tài khoản đã bị khoá. Không thể thực hiện giao dịch!");
+        }
+        if (!recipientAccount.isActive()) {
+            throw new RuntimeException("Tài khoản người nhận đã bị khoá. Không thể thực hiện giao dịch!");
+        }
+        if (debtReminder.getAmount().compareTo(account.getBalance()) > 0) {
+            throw new RuntimeException("Tài khoản không đủ số dư!");
+        }
         Transaction transaction = new Transaction().toBuilder()
                 .tradingDate(LocalDateTime.now())
                 .amount(debtReminder.getAmount())
