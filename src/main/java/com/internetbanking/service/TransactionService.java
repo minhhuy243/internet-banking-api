@@ -21,7 +21,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.criteria.Predicate;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -127,7 +131,7 @@ public class TransactionService {
         return transactionMapper.entityToDto(transactionRepository.save(transaction));
     }
 
-    public Page<TransactionDto> getHistory(TransactionType type, Pageable pageable) {
+    public Page<TransactionDto> getHistory(TransactionType type, Instant fromDate, Instant toDate, Pageable pageable) {
         Page<Transaction> transactions;
         if (type != null) {
             transactions = transactionRepository.findByRecipientAccountIdOrAccountIdAndStatusAndType(
@@ -145,6 +149,10 @@ public class TransactionService {
                     pageable
             );
         }
+//        Specification<Transaction> transactionSpecification = (root, query, cb) -> {
+//            List<Predicate> predicates = new ArrayList<>();
+//            predicates.add();
+//        }
         return new PageImpl<>(
                 transactions.getContent().stream().map(transactionMapper::entityToDto).collect(Collectors.toList()),
                 transactions.getPageable(),

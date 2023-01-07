@@ -28,7 +28,7 @@ email:
   port: 587
   username: hcmus.nhom04@gmail.com
   password: oixxgwffclltifel
-  debug: true
+#  debug: true
 
 internet-banking:
   app:

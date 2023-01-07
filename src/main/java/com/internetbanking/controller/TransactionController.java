@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.Instant;
 
 @RestController
 @RequestMapping("/transactions")
@@ -31,8 +32,10 @@ public class TransactionController {
 
     @GetMapping("history") // thieu filter loai
     public ResponseEntity<?> getHistory(@PageableDefault(value = 20, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable,
-                                        @RequestParam(name = "type", required = false) TransactionType type) {
-        Page<TransactionDto> results = transactionService.getHistory(type, pageable);
+                                        @RequestParam(name = "type", required = false) TransactionType type,
+                                        @RequestParam(name = "fromDate", required = false) Instant fromDate,
+                                        @RequestParam(name = "toDate", required = false) Instant toDate) {
+        Page<TransactionDto> results = transactionService.getHistory(type, fromDate, toDate, pageable);
         return ResponseEntity.ok(results);
     }
 
