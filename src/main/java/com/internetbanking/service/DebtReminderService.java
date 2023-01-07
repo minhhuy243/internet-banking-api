@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -91,7 +92,7 @@ public class DebtReminderService {
         debtReminderRepository.save(debtReminder);
     }
 
-    public void payment(Long debtReminderId) {
+    public void payment(Long debtReminderId) throws MessagingException {
         DebtReminder debtReminder = debtReminderRepository.findById(debtReminderId).orElseThrow(() -> new RuntimeException("Nhắc nợ không tồn tại!"));
         if (!debtReminder.getActive()) {
             throw new RuntimeException("Nhắc nợ đã bị huỷ!");

@@ -21,6 +21,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
 import javax.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -49,7 +50,7 @@ public class TransactionService {
     }
 
     @Transactional
-    public TransactionDto create(TransactionRequest request) {
+    public TransactionDto create(TransactionRequest request) throws MessagingException {
         if (request.getType() == TransactionType.TRANSFER) {
             Account recipientAccount = accountRepository.findByAccountNumber(request.getRecipientAccountNumber()).orElseThrow(() -> new RuntimeException("Tài khoản người nhận không tồn tại!"));
             Account account = accountRepository.findById(securityService.getAccountId()).orElseThrow(() -> new RuntimeException("Tài khoản người gửi không tồn tại!"));

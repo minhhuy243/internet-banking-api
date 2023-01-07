@@ -9,6 +9,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
+
 @RestController
 @RequestMapping("/debt-reminders")
 @RequiredArgsConstructor
@@ -40,7 +42,7 @@ public class DebtReminderController {
     }
 
     @PostMapping("/payment/{debtReminderId}")
-    public ResponseEntity<?> paymentDebtReminder(@PathVariable("debtReminderId") Long debtReminderId) {
+    public ResponseEntity<?> paymentDebtReminder(@PathVariable("debtReminderId") Long debtReminderId) throws MessagingException {
         debtReminderService.payment(debtReminderId);
         return ResponseEntity.ok().build();
     }

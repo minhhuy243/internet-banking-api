@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -166,7 +167,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void sendOTPForgotPassword(String email) {
+    public void sendOTPForgotPassword(String email) throws MessagingException {
         Integer otpValue = otpService.generateOtp(email);
         if (!emailService.sendMessage(email, otpValue, "FORGOT_PASSWORD")) {
             throw new RuntimeException("Đã có lỗi xảy ra!");

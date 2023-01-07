@@ -14,6 +14,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.validation.Valid;
 import java.time.Instant;
 
@@ -50,7 +51,7 @@ public class TransactionController {
     }
 
     @PostMapping("")
-    public ResponseEntity<?> create(@Valid @RequestBody TransactionRequest request) {
+    public ResponseEntity<?> create(@Valid @RequestBody TransactionRequest request) throws MessagingException {
         Object result = transactionService.create(request);
         return ResponseEntity.ok(result);
     }

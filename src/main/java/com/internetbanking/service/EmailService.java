@@ -7,7 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
 
 @Service
 @RequiredArgsConstructor
@@ -17,13 +21,13 @@ public class EmailService {
     private final JavaMailSender emailSender;
     private final SecurityService securityService;
 
-    public Boolean sendMessage(String recipientEmail, Integer otpValue, String type)
-    {
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(recipientEmail);
+    public Boolean sendMessage(String recipientEmail, Integer otpValue, String type) throws MessagingException {
+        MimeMessage mimeMessage = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+        helper.setTo(recipientEmail);
         String content = "";
         if (type.equalsIgnoreCase("TRANSACTION")) {
-            mailMessage.setSubject("Xác nhận giao dịch - Internet Banking");
+            helper.setSubject("Xác nhận giao dịch - Internet Banking");
             content = "<div style=\"font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2\">\n" +
                     "  <div style=\"margin:50px auto;width:70%;padding:20px 0\">\n" +
                     "    <div style=\"border-bottom:1px solid #eee\">\n" +
@@ -36,7 +40,7 @@ public class EmailService {
                     "  </div>\n" +
                     "</div>";
         } else if (type.equalsIgnoreCase("FORGOT_PASSWORD")) {
-            mailMessage.setSubject("Quên mật khẩu - Internet Banking");
+            helper.setSubject("Quên mật khẩu - Internet Banking");
             content = "<div style=\"font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2\">\n" +
                     "  <div style=\"margin:50px auto;width:70%;padding:20px 0\">\n" +
                     "    <div style=\"border-bottom:1px solid #eee\">\n" +
@@ -49,10 +53,10 @@ public class EmailService {
                     "  </div>\n" +
                     "</div>";
         }
-        mailMessage.setText(content);
+        helper.setText(content);
         Boolean isSent = false;
         try {
-            emailSender.send(mailMessage);
+            emailSender.send(mimeMessage);
             isSent = true;
         } catch (Exception e) {
             log.error("Sending e-mail error: {}", e.getMessage());
